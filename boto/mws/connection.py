@@ -54,7 +54,7 @@ api_version_path = {
     'OffAmazonPayments': ('2013-01-01', 'SellerId',
                           '/OffAmazonPayments/2013-01-01'),
 }
-content_md5 = lambda c: encodebytes(hashlib.md5(c).digest()).strip()
+content_md5 = lambda c: encodebytes(hashlib.md5(c).digest()).strip().decode('utf-8')
 decorated_attrs = ('action', 'response', 'section',
                    'quota', 'restore', 'version')
 api_call_map = {}
@@ -323,7 +323,10 @@ class MWSConnection(AWSQueryConnection):
                                                response.reason, body)
         digest = response.getheader('Content-MD5')
         if digest is not None:
-            assert content_md5(body) == digest
+            if type(content_md5(body)) is bytes:
+                assert content_md5(body).decode() == digest
+            else:
+                assert content_md5(body) == digest
         contenttype = response.getheader('Content-Type')
         return self._parse_response(parser, contenttype, body)
 
